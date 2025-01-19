@@ -1,0 +1,220 @@
+
+#include <SoftwareSerial.h> // Pour le module Bluetooth
+
+// Déclaration des broches Bluetooth
+SoftwareSerial bluetooth(10, 11); // RX, TX
+
+// Déclaration des broches pour les moteurs
+const int motorLeftForward = 5;
+const int motorLeftBackward = 6;
+const int motorRightForward = 9;
+const int motorRightBackward = 10;
+const int motorSpeedPin = 3; // PWM pour la vitesse
+
+// Déclaration des broches pour les capteurs
+const int trigPin = 2; // Ultrason Trig
+const int echoPin = 3; // Ultrason Echo
+const int irSensorPin = 4; // Capteur infrarouge
+
+// Déclaration des broches pour le buzzer
+const int buzzerPin = 12;
+
+// Variables pour le capteur ultrason
+long duration;
+int distance;
+
+// Variables de mode
+bool isManualMode = true; // Par défaut, le robot est en mode manuel
+int speedLevel = 255;     // Vitesse maximale par défaut (PWM : 0-255)
+
+// Variables d'état
+bool isStopped = true;
+
+void setup() {
+  // Initialisation des broches des moteurs
+  pinMode(motorLeftForward, OUTPUT);
+  pinMode(motorLeftBackward, OUTPUT);
+  pinMode(motorRightForward, OUTPUT);
+  pinMode(motorRightBackward, OUTPUT);
+  pinMode(motorSpeedPin, OUTPUT);
+
+  // Initialisation des broches des capteurs
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(irSensorPin, INPUT);
+
+  // Initialisation du buzzer
+  pinMode(buzzerPin, OUTPUT);
+
+  // Initialisation des communications
+  bluetooth.begin(9600); // Communication Bluetooth
+  Serial.begin(9600);    // Pour déboguer via le moniteur série
+
+  // Indication de démarrage
+  tone(buzzerPin, 1000, 200); // Buzzer court pour signaler le démarrage
+  Serial.println("Robot prêt. Mode par défaut : Manuel.");
+  bluetooth.println("Robot prêt. Mode par défaut : Manuel.");
+}
+
+void loop() {
+  // Vérifier les commandes Bluetooth
+  if (bluetooth.available()) {
+    char command = bluetooth.read();
+    handleCommand(command);
+  }
+
+  // Mode automatique : éviter les obstacles
+  if (!isManualMode) {
+    autonomousMode();
+  }
+
+  // Diagnostic périodique
+  static unsigned long lastDiagnostic = 0;
+  if (millis() - lastDiagnostic > 5000) { // Toutes les 5 secondes
+    sendDiagnostics();
+    lastDiagnostic = millis();
+  }
+}
+
+// Fonction pour gérer les commandes Bluetooth
+void handleCommand(char command) {
+  switch (command) {
+    case 'w': // Avancer
+      moveForward();
+      break;
+    case 's': // Reculer
+      moveBackward();
+      break;
+    case 'a': // Tourner à gauche
+      turnLeft();
+      break;
+    case 'd': // Tourner à droite
+      turnRight();
+      break;
+    case 'q': // Arrêt
+      stopMotors();
+      break;
+    case 'm': // Basculer en mode manuel
+      isManualMode = true;
+      Serial.println("Mode manuel activé.");
+      bluetooth.println("Mode manuel activé.");
+      break;
+    case 'u': // Basculer en mode automatique
+      isManualMode = false;
+      Serial.println("Mode automatique activé.");
+      bluetooth.println("Mode automatique activé.");
+      break;
+    case '+': // Augmenter la vitesse
+      adjustSpeed(20);
+      break;
+    case '-': // Diminuer la vitesse
+      adjustSpeed(-20);
+      break;
+    default:
+      Serial.println("Commande inconnue !");
+      bluetooth.println("Commande inconnue !");
+      break;
+  }
+}
+
+// Fonction pour ajuster la vitesse des moteurs
+void adjustSpeed(int increment) {
+  speedLevel = constrain(speedLevel + increment, 0, 255);
+  analogWrite(motorSpeedPin, speedLevel);
+  Serial.print("Vitesse réglée à : ");
+  Serial.println(speedLevel);
+  bluetooth.print("Vitesse réglée à : ");
+  bluetooth.println(speedLevel);
+}
+
+// Fonction pour le mode autonome
+void autonomousMode() {
+  distance = measureDistance();
+  if (distance < 20) {
+    stopMotors();
+    tone(buzzerPin, 500, 300); // Son d'alerte
+    Serial.println("Obstacle détecté !");
+    bluetooth.println("Obstacle détecté !");
+    moveBackward(); // Reculer légèrement
+    delay(500);
+    turnLeft(); // Tourner pour éviter l'obstacle
+    delay(500);
+    stopMotors();
+  } else {
+    moveForward();
+  }
+}
+
+// Fonction pour mesurer la distance avec le capteur ultrason
+int measureDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  int distance = duration * 0.034 / 2; // Convertir en cm
+  return distance;
+}
+
+// Fonction pour envoyer un diagnostic via Bluetooth
+void sendDiagnostics() {
+  bluetooth.println("--- DIAGNOSTIC ---");
+  bluetooth.print("Mode : ");
+  bluetooth.println(isManualMode ? "Manuel" : "Automatique");
+  bluetooth.print("Distance (Ultrason) : ");
+  bluetooth.print(measureDistance());
+  bluetooth.println(" cm");
+  bluetooth.print("Capteur infrarouge : ");
+  bluetooth.println(digitalRead(irSensorPin) == HIGH ? "Obstacle détecté" : "Pas d'obstacle");
+  bluetooth.print("Vitesse actuelle : ");
+  bluetooth.println(speedLevel);
+  bluetooth.println("-------------------");
+}
+
+// Fonctions pour contrôler les moteurs
+void moveForward() {
+  digitalWrite(motorLeftForward, HIGH);
+  digitalWrite(motorLeftBackward, LOW);
+  digitalWrite(motorRightForward, HIGH);
+  digitalWrite(motorRightBackward, LOW);
+  analogWrite(motorSpeedPin, speedLevel);
+  isStopped = false;
+}
+
+void moveBackward() {
+  digitalWrite(motorLeftForward, LOW);
+  digitalWrite(motorLeftBackward, HIGH);
+  digitalWrite(motorRightForward, LOW);
+  digitalWrite(motorRightBackward, HIGH);
+  analogWrite(motorSpeedPin, speedLevel);
+  isStopped = false;
+}
+
+void turnLeft() {
+  digitalWrite(motorLeftForward, LOW);
+  digitalWrite(motorLeftBackward, HIGH);
+  digitalWrite(motorRightForward, HIGH);
+  digitalWrite(motorRightBackward, LOW);
+  analogWrite(motorSpeedPin, speedLevel);
+  isStopped = false;
+}
+
+void turnRight() {
+  digitalWrite(motorLeftForward, HIGH);
+  digitalWrite(motorLeftBackward, LOW);
+  digitalWrite(motorRightForward, LOW);
+  digitalWrite(motorRightBackward, HIGH);
+  analogWrite(motorSpeedPin, speedLevel);
+  isStopped = false;
+}
+
+void stopMotors() {
+  digitalWrite(motorLeftForward, LOW);
+  digitalWrite(motorLeftBackward, LOW);
+  digitalWrite(motorRightForward, LOW);
+  digitalWrite(motorRightBackward, LOW);
+  analogWrite(motorSpeedPin, 0);
+  isStopped = true;
+}
