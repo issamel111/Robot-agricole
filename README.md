@@ -92,7 +92,7 @@ Le robot passe en mode automatique où il :
 
 ## Vidéo de Démonstration
 
-🎥 **[Voir la vidéo de démonstration sur YouTube]((https://youtu.be/-gz4ryi8BaI))**
+🎥 **[Voir la vidéo de démonstration sur YouTube](https://youtu.be/-gz4ryi8BaI)**
 
 ---
 
