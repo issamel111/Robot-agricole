@@ -95,7 +95,11 @@ Le robot passe en mode automatique où il :
 🎥 **[Voir la vidéo de démonstration sur YouTube](https://youtu.be/-gz4ryi8BaI)**
 
 ---
+## Auteurs
 
+- **Issam Elazhar** – Conception, développement et gestion du projet.
+
+---
 ## Remerciements
 
 Merci à **Polytechnique Montréal** pour le soutien et les ressources tout au long du projet.
