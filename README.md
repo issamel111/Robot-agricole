@@ -5,7 +5,7 @@ Conception et développement d'un robot agricole automatisé pour le semis préc
 Ce projet consiste en la conception et la programmation d'un **robot agricole automatisé** contrôlé via Bluetooth. Le robot est conçu pour effectuer des tâches de semis avec une grande précision, en utilisant un capteur ultrason pour éviter les obstacles, et un module Bluetooth pour la commande à distance.
 
 L'objectif du projet est de créer un robot durable, léger et autonome pour améliorer l'efficacité des semis dans l'agriculture.
-![Ass Général A](images/Ass_Général_A.PNG)
+![Ass Général A](https://github.com/issamel111/Robot-agricole/blob/main/images/Ass_Général_A.PNG?raw=true)
 ---
 
 ## Fonctionnalités
@@ -42,8 +42,8 @@ Le robot passe en mode automatique où il :
 ---
 
 ## Installation
-![Sous-Ensemble A](images/Sous-Ensemble_A.PNG)
-![Sous-Ensemble B](images/Sous-Ensemble_B.PNG)
+![Sous-Ensemble A](https://github.com/issamel111/Robot-agricole/blob/main/images/Sous-Ensemble_A.PNG?raw=true)
+![Sous-Ensemble B](https://github.com/issamel111/Robot-agricole/blob/main/images/Sous-Ensemble_B.PNG?raw=true)
 ### 1. Connecter les composants :
 1. **Module Bluetooth HC-05** :
    - RX → broche 10 sur Arduino.
@@ -93,15 +93,4 @@ Le robot passe en mode automatique où il :
 
 ## Vidéo de Démonstration
 
-🎥 **[Voir la vidéo de démonstration sur YouTube](https://youtu.be/-gz4ryi8BaI)**
-
----
-## Auteurs
-
-- **Issam Elazhar** – Conception, développement et gestion du projet.
-
----
-## Remerciements
-
-Merci à **Polytechnique Montréal** pour le soutien et les ressources tout au long du projet.
-
+🎥 **[Voir la vidéo de démonstration sur YouTube](h
